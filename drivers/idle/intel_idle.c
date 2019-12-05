@@ -66,6 +66,9 @@
 #include <asm/mwait.h>
 #include <asm/msr.h>
 
+/* dsites 2019.03.12 */
+#include <linux/kutrace.h>
+
 #define INTEL_IDLE_VERSION "0.4.1"
 
 static struct cpuidle_driver intel_idle_driver = {
@@ -933,6 +936,8 @@ static __cpuidle int intel_idle(struct cpuidle_device *dev,
 		}
 	}
 
+	/* dsites 2019.03.12 */
+	kutrace1(KUTRACE_MWAIT, eax);
 	mwait_idle_with_hints(eax, ecx);
 
 	if (!static_cpu_has(X86_FEATURE_ARAT) && tick)
@@ -953,6 +958,8 @@ static void intel_idle_s2idle(struct cpuidle_device *dev,
 	unsigned long ecx = 1; /* break on interrupt flag */
 	unsigned long eax = flg2MWAIT(drv->states[index].flags);
 
+	/* dsites 2019.03.12 */
+	kutrace1(KUTRACE_MWAIT, eax);
 	mwait_idle_with_hints(eax, ecx);
 }
 

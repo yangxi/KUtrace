@@ -22,6 +22,10 @@
 #define CREATE_TRACE_POINTS
 #include <asm/trace/irq_vectors.h>
 
+/* dsites 2019.03.05 */
+#include <linux/kutrace.h>
+
+
 DEFINE_PER_CPU_SHARED_ALIGNED(irq_cpustat_t, irq_stat);
 EXPORT_PER_CPU_SYMBOL(irq_stat);
 
@@ -237,6 +241,8 @@ __visible unsigned int __irq_entry do_IRQ(struct pt_regs *regs)
 	unsigned vector = ~regs->orig_ax;
 
 	entering_irq();
+	/* dsites 2019.03.05 */
+	kutrace1(KUTRACE_IRQ + (vector & 0xFF), 0);
 
 	/* entering_irq() tells RCU that we're not quiescent.  Check it. */
 	RCU_LOCKDEP_WARN(!rcu_is_watching(), "IRQ failed to wake up RCU");
@@ -255,6 +261,9 @@ __visible unsigned int __irq_entry do_IRQ(struct pt_regs *regs)
 		}
 	}
 
+	/* dsites 2019.03.05 */
+	kutrace1(KUTRACE_IRQRET + (vector & 0xFF), 0);
+
 	exiting_irq();
 
 	set_irq_regs(old_regs);
@@ -272,11 +281,17 @@ __visible void __irq_entry smp_x86_platform_ipi(struct pt_regs *regs)
 	struct pt_regs *old_regs = set_irq_regs(regs);
 
 	entering_ack_irq();
+	/* dsites 2019.03.06 */
+	kutrace1(KUTRACE_IRQ + X86_PLATFORM_IPI_VECTOR, 0);
+
 	trace_x86_platform_ipi_entry(X86_PLATFORM_IPI_VECTOR);
 	inc_irq_stat(x86_platform_ipis);
 	if (x86_platform_ipi_callback)
 		x86_platform_ipi_callback();
 	trace_x86_platform_ipi_exit(X86_PLATFORM_IPI_VECTOR);
+
+	/* dsites 2019.03.06 */
+	kutrace1(KUTRACE_IRQRET + X86_PLATFORM_IPI_VECTOR, 0);
 	exiting_irq();
 	set_irq_regs(old_regs);
 }

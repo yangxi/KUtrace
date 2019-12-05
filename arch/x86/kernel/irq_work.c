@@ -12,14 +12,23 @@
 #include <asm/trace/irq_vectors.h>
 #include <linux/interrupt.h>
 
+/* dsites 2019.03.06 */
+#include <linux/kutrace.h>
+
 #ifdef CONFIG_X86_LOCAL_APIC
 __visible void __irq_entry smp_irq_work_interrupt(struct pt_regs *regs)
 {
 	ipi_entering_ack_irq();
+	/* dsites 2019.03.06 */
+	kutrace1(KUTRACE_IRQ + IRQ_WORK_VECTOR, 0);
+
 	trace_irq_work_entry(IRQ_WORK_VECTOR);
 	inc_irq_stat(apic_irq_work_irqs);
 	irq_work_run();
 	trace_irq_work_exit(IRQ_WORK_VECTOR);
+
+	/* dsites 2019.03.06 */
+	kutrace1(KUTRACE_IRQRET + IRQ_WORK_VECTOR, 0);
 	exiting_irq();
 }
 

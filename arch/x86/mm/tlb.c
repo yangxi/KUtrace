@@ -15,6 +15,9 @@
 #include <asm/apic.h>
 #include <asm/uv/uv.h>
 
+/* dsites 2019.03.06 */
+#include <linux/kutrace.h>
+
 /*
  *	TLB flushing, formerly SMP-only
  *		c/o Linus Torvalds.

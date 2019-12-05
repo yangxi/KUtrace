@@ -58,6 +58,9 @@
 #include <asm/intel-family.h>
 #include <asm/irq_regs.h>
 
+/* dsites 2019.03.01 */
+#include <linux/kutrace.h>
+
 unsigned int num_processors;
 
 unsigned disabled_cpus;
@@ -1050,9 +1053,15 @@ __visible void __irq_entry smp_apic_timer_interrupt(struct pt_regs *regs)
 	 * interrupt lock, which is the WrongThing (tm) to do.
 	 */
 	entering_ack_irq();
+	/* dsites 2019.03.05  */
+	kutrace1(KUTRACE_IRQ + LOCAL_TIMER_VECTOR, 0);
+
 	trace_local_timer_entry(LOCAL_TIMER_VECTOR);
 	local_apic_timer_interrupt();
 	trace_local_timer_exit(LOCAL_TIMER_VECTOR);
+
+	/* dsites 2019.03.05  */
+	kutrace1(KUTRACE_IRQRET + LOCAL_TIMER_VECTOR, 0);
 	exiting_irq();
 
 	set_irq_regs(old_regs);

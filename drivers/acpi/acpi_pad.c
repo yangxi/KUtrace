@@ -29,6 +29,10 @@
 #include <asm/mwait.h>
 #include <xen/xen.h>
 
+/* dsites 2019.03.12 */
+#include <linux/kutrace.h>
+
+
 #define ACPI_PROCESSOR_AGGREGATOR_CLASS	"acpi_pad"
 #define ACPI_PROCESSOR_AGGREGATOR_DEVICE_NAME "Processor Aggregator"
 #define ACPI_PROCESSOR_AGGREGATOR_NOTIFY 0x80
@@ -174,7 +178,9 @@ static int power_saving_thread(void *data)
 			tick_broadcast_enable();
 			tick_broadcast_enter();
 			stop_critical_timings();
-
+	
+			/* dsites 2019.03.12 */
+			kutrace1(KUTRACE_MWAIT, power_saving_mwait_eax);
 			mwait_idle_with_hints(power_saving_mwait_eax, 1);
 
 			start_critical_timings();
